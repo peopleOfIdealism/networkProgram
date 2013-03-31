@@ -1,5 +1,35 @@
 #include "../head.h"
 
+int str_cli(FILE *infd, int fd)
+{
+    char sendbuff[BUFFSIZE_MY];
+    char recvbuff[BUFFSIZE_MY];
+    int n = 0;
+    
+    struct args args;
+    struct result result;
+    
+    bzero(sendbuff, BUFFSIZE_MY);
+    bzero(recvbuff, BUFFSIZE_MY);
+    while(fgets(sendbuff, BUFFSIZE_MY, infd) != NULL)
+    {
+//        write(fd, sendbuff, 1);
+//        sleep(1);
+//        write(fd, sendbuff+1, strlen(sendbuff)-1);
+        if(2 != sscanf(sendbuff, "%ld%ld", &args.arg1, &args.arg2))
+        {
+            perror("sscanf");
+            printf("invaild input: %s\n", sendbuff);
+            continue;
+        }
+
+        write(fd, sendbuff, strlen(sendbuff));
+        
+        n = read(fd, recvbuff, BUFFSIZE_MY);
+        
+        fputs(recvbuff, stdout);
+    }
+}
 
 int main(void)
 {
@@ -8,7 +38,7 @@ int main(void)
     char buff[BUFFSIZE_MY];
     int count = 0;
     char c;
-    
+    int n = 0;
     struct sockaddr_in servaddr;
     
     connfd = socket(PF_INET, SOCK_STREAM, 0);
@@ -29,27 +59,7 @@ int main(void)
 again:
     ret = connect(connfd, (SA *)&servaddr, sizeof(servaddr));
     if(ret >= 0)
-    for( ; ; )
-    {
-        count = 0;
-        bzero(buff, strlen(buff));
-        while((c = getchar()) != '\n')
-        {
-            buff[count++] = c;
-/*            if('\n' == c)
-            {
-                buff[count++] = 0;//NULL
-            }
-            */
-        }
-        buff[count++] = c;
-        buff[count++] = 0;
-        if(count != write(connfd, buff, count))
-            printf("write error\n");
-        bzero(buff, strlen(buff));
-        while(read(connfd, buff, BUFFSIZE_MY) > 0)
-            printf("receive:\n%s\n", buff);
-    }
+        str_cli(stdin, connfd);
     else
     {
         perror("connect");
