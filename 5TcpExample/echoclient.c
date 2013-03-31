@@ -22,12 +22,12 @@ int str_cli(FILE *infd, int fd)
             printf("invaild input: %s\n", sendbuff);
             continue;
         }
-
-        write(fd, sendbuff, strlen(sendbuff));
+        printf("args size %d\nargs.arg1 %ld\nargs.arg2 %ld\n", sizeof(args),args.arg1, args.arg2);
+        write(fd, &args, sizeof(args));
         
-        n = read(fd, recvbuff, BUFFSIZE_MY);
+        n = read(fd, &result, sizeof(result));
         
-        fputs(recvbuff, stdout);
+        printf("%ld\n", result.sum);
     }
 }
 
