@@ -1,5 +1,39 @@
 #include "../head.h"
 
+int str_echo(int fd)
+{
+    int n = 1;
+    char buff[BUFFSIZE_MY];
+    long arg1 = 0;
+    long arg2 = 0;
+//    printf("\nbuff %s\n", buff);
+    bzero(buff, BUFFSIZE_MY);
+    while(1)
+    {
+        if(0 == (n = read(fd, buff, BUFFSIZE_MY)))
+            return;
+        
+        if(2 == sscanf(buff, "%ld%ld", &arg1, &arg2))
+            snprintf(buff, sizeof(buff), "%ld\n", arg1+arg2);
+        else
+            snprintf(buff, sizeof(buff), "input error\n");
+        n = strlen(buff);
+        printf("\nbuff\nlen %d\n%s\n", (int)strlen(buff), buff);
+        write(fd, buff, n);
+        bzero(buff, BUFFSIZE_MY);
+    }
+}
+
+void sig_chld(int signo)
+{
+    pid_t pid;
+    int stat;
+    while((pid = waitpid(-1, &stat, WNOHANG)) > 0)
+        printf("child %d terminated\n", pid);
+
+    return;
+}
+
 int main(void)
 {
     int ret = 0;
@@ -7,6 +41,8 @@ int main(void)
     int connfd = 0;
     char buff[BUFFSIZE_MY];
     int len = 0;
+    int n = 0;
+    pid_t pid;
     
     struct sockaddr_in servaddr;
     
@@ -22,16 +58,22 @@ int main(void)
     
     listen(listenfd, 5);
     
-    len = sizeof(cliaddr);
-    printf("");
-    while((connfd = accept(listenfd, (SA *)&cliaddr, &len)) > 0)
+    signal(SIGCHLD, sig_chld);
+    while(1)
     {
-   
-        while(read(connfd, buff, BUFFSIZE_MY) > 0
+        len = sizeof(cliaddr);
+        connfd = accept(listenfd, (SA *)&cliaddr, &len);
+        if(EINTR == errno)
+            continue;
+        else
+            printf("accept error\n");
+        if(0 == (pid = fork()))
         {
-        printf("receive buff %s\n", buff);
-        write(connfd, buff, BUFFSIZE_MY);
+            close(listenfd);
+            str_echo(connfd);
+            exit(0);
         }
+        close(connfd);
     }
     
     
