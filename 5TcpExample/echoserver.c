@@ -23,12 +23,15 @@ int main(void)
     listen(listenfd, 5);
     
     len = sizeof(cliaddr);
-    
+    printf("");
     while((connfd = accept(listenfd, (SA *)&cliaddr, &len)) > 0)
     {
-        read(connfd, buff, BUFFSIZE_MY);
+   
+        while(read(connfd, buff, BUFFSIZE_MY) > 0
+        {
         printf("receive buff %s\n", buff);
         write(connfd, buff, BUFFSIZE_MY);
+        }
     }
     
     
