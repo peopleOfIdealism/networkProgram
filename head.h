@@ -25,11 +25,11 @@
 #define BUFFSIZE_MY 1024
 
 struct args{
-    long arg1;
-    long arg2;
+    int arg1;
+    int arg2;
 };
 
 struct result{
-    long sum;
+    int sum;
 };
 

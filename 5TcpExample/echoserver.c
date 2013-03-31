@@ -8,19 +8,27 @@ int str_echo(int fd)
     long arg2 = 0;
 //    printf("\nbuff %s\n", buff);
     bzero(buff, BUFFSIZE_MY);
+    struct args args;
+    struct result result;
     while(1)
     {
-        if(0 == (n = read(fd, buff, BUFFSIZE_MY)))
+        //if(0 == (n = read(fd, buff, BUFFSIZE_MY)))
+        if(0 == (n = read(fd, &args, sizeof(args))))
             return;
-        
-        if(2 == sscanf(buff, "%ld%ld", &arg1, &arg2))
+        printf("recv %d\n", n);
+/*        if(2 == sscanf(buff, "%ld%ld", &arg1, &arg2))
             snprintf(buff, sizeof(buff), "%ld\n", arg1+arg2);
         else
             snprintf(buff, sizeof(buff), "input error\n");
         n = strlen(buff);
         printf("\nbuff\nlen %d\n%s\n", (int)strlen(buff), buff);
-        write(fd, buff, n);
-        bzero(buff, BUFFSIZE_MY);
+*/
+        printf("args.arg1 %d\nargs.arg2 %d\n", args.arg1, args.arg2);
+        result.sum = args.arg1+ args.arg2;
+        
+        printf("sum %d", result.sum);
+        write(fd, &result, sizeof(result));
+        //bzero(buff, BUFFSIZE_MY);
     }
 }
 
